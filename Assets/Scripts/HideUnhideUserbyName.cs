@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.IO;
+using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -9,26 +12,23 @@ public class HideUnhideUserbyName : MonoBehaviour
     string[] logEntry;
     public GameObject[] PC;
     FileInfo log = new FileInfo(@"\\philnet-dc1\Userlogs$\sessions.txt");
+    long lastLogLength;
 
     public TextMeshProUGUI freeSeatsText;
     public int openSeats;
     
-
     private void Start()
     {
         openSeats = 30;
         freeSeatsText.text = "Freie Plätze: " + openSeats;
+
+        lastLogLength = log.Length;
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        //InitializeComponent();
-        //logWatcherTimer.Start();
-        logWatcher()
-
-
+        LogWatcher();
     }
 
     public void UserJoin(string PCName)
@@ -58,26 +58,14 @@ public class HideUnhideUserbyName : MonoBehaviour
         }
     }
 
-    /*private void logWatcherTimer_Tick(object sender, EventArgs e)
-    {
-        FileInfo log = new FileInfo(@"\\philnet-dc1\Userlogs$\sessions.txt");
-        //if (!logWorker.IsBusy) logWorker.RunWorkerAsync(log);
-    }*/ //object sender, DoWorkEventArgs e
-
-    public void logWatcher()
+    public void LogWatcher()
     {
         // Just skip if log file hasn't changed
         if (lastLogLength == log.Length) return;
 
         // retval
-
         newLine = string.Empty;
-        foreach (string s in logEntry)
-        {
-            s = string.Empty;
-        }
-
-        //FileInfo log = (FileInfo)e.Argument;
+        Array.Clear(logEntry, 0, logEntry.Length);
 
         using (StreamReader stream = new StreamReader(log.FullName))
         {
@@ -90,12 +78,8 @@ public class HideUnhideUserbyName : MonoBehaviour
         // Keep track of the previuos log length
         lastLogLength = log.Length;
 
-        // Assign the result back to the worker, to be
-        // consumed by the form
-        //e.Result = newLine;
-
-        string separatingString = " - ";
-        logEntry = newLine.Split(separatingString, System.StringSplitOptions.RemoveEmptyEntries);
+        string[] separatingStrings = { " - " };
+        logEntry = newLine.Split(separatingStrings, System.StringSplitOptions.RemoveEmptyEntries);
 
         if(logEntry[4] == "Anmeldung ")
         {
